@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 
-public class API<JSONObject> {
+public class API{
     public StringBuffer API(String apiUrl) {
         StringBuffer response = null;
         try {
