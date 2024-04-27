@@ -7,7 +7,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import javax.swing.*;
 
+
 public class Quiz implements ActionListener {
+    private Timer pause;
+
     public StringBuffer getAPI(String apiUrl) {
         StringBuffer response = null;
         try {
@@ -902,6 +905,8 @@ public class Quiz implements ActionListener {
     JLabel seconds_left = new JLabel();
     JTextField number_right = new JTextField();
     JTextField percentage = new JTextField();
+    JButton buttonL = new JButton();
+    boolean lButtonPressed = false;
 
     Timer shotclock = new Timer(1000, new ActionListener() {
         @Override
@@ -921,10 +926,11 @@ public class Quiz implements ActionListener {
         frame.setLayout(null);
         frame.setResizable(false);
 
+
         textfield.setBounds(0, 0, 650, 50);
         textfield.setBackground(new Color(25, 25, 25));
         textfield.setForeground(new Color(248, 228, 204));
-        textfield.setFont(new Font("Bookman Old Style", Font.BOLD, 30));
+        textfield.setFont(new Font("Bookman Old Style", Font.BOLD, 25));
         textfield.setBorder(BorderFactory.createBevelBorder(1));
         textfield.setHorizontalAlignment(JTextField.CENTER);
         textfield.setEditable(false);
@@ -934,7 +940,7 @@ public class Quiz implements ActionListener {
         textarea.setWrapStyleWord(true);
         textarea.setBackground(new Color(25, 25, 25));
         textarea.setForeground(new Color(248, 228, 204));
-        textarea.setFont(new Font("Bookman Old Style", Font.BOLD, 18));
+        textarea.setFont(new Font("Bookman Old Style", Font.BOLD, 15));
         textarea.setBorder(BorderFactory.createBevelBorder(1));
         textarea.setEditable(false);
 
@@ -965,6 +971,14 @@ public class Quiz implements ActionListener {
         buttonD.addActionListener(this);
         buttonD.setText("D");
         buttonD.setBackground(new Color(255, 255, 255));
+
+
+        buttonL.setBounds(0, 500, 100, 100);
+        buttonL.setFont(new Font("Algerian", Font.BOLD, 25));
+        buttonL.setFocusable(false);
+        buttonL.setText("L");
+        buttonL.addActionListener(this);
+        buttonL.setBackground(new Color(194, 111, 111));
 
         answer_labelA.setBounds(125, 100, 500, 100);
         answer_labelA.setBackground(new Color(20, 46, 54));
@@ -1023,6 +1037,30 @@ public class Quiz implements ActionListener {
         frame.add(buttonB);
         frame.add(buttonC);
         frame.add(buttonD);
+        frame.add(buttonL);
+        buttonL.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Halve the remaining time
+                seconds /= 2;
+                seconds_left.setText(String.valueOf(seconds));
+
+                // Restart the timer with the updated time
+                shotclock.restart();
+
+                // Enable ABCD buttons
+                buttonA.setEnabled(true);
+                buttonB.setEnabled(true);
+                buttonC.setEnabled(true);
+                buttonD.setEnabled(true);
+
+                // Disable the L button
+                buttonL.setEnabled(false);
+
+                // Set lButtonPressed to true indicating the L button was pressed
+                lButtonPressed = true;
+            }
+        });
         frame.add(answer_labelA);
         frame.add(answer_labelB);
         frame.add(answer_labelC);
@@ -1036,6 +1074,8 @@ public class Quiz implements ActionListener {
     }
 
     public void nextQuestion() {
+        lButtonPressed = false;
+        buttonL.setEnabled(true);
         if (index >= total_questions) {
             results();
         } else {
@@ -1069,19 +1109,19 @@ public class Quiz implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        buttonA.setEnabled(false);
-        buttonB.setEnabled(false);
-        buttonC.setEnabled(false);
-        buttonD.setEnabled(false);
 
         if (e.getSource() == buttonA) {
             answer = 'A';
+            buttonL.setEnabled(false);
+            displayAnswer();
             if (answer == answers[index]) {
                 correct_guesses++;
             }
         }
         if (e.getSource() == buttonB) {
             answer = 'B';
+            buttonL.setEnabled(false);
+            displayAnswer();
             if (answer == answers[index]) {
                 correct_guesses++;
             }
@@ -1089,6 +1129,8 @@ public class Quiz implements ActionListener {
 
         if (e.getSource() == buttonC) {
             answer = 'C';
+            buttonL.setEnabled(false);
+            displayAnswer();
             if (answer == answers[index]) {
                 correct_guesses++;
             }
@@ -1096,11 +1138,20 @@ public class Quiz implements ActionListener {
 
         if (e.getSource() == buttonD) {
             answer = 'D';
+            buttonL.setEnabled(false);
+            displayAnswer();
             if (answer == answers[index]) {
                 correct_guesses++;
             }
         }
-        displayAnswer();
+        // Check if the L button was pressed and an option (A, B, C, or D) was selected
+        if (lButtonPressed && (e.getSource() == buttonA || e.getSource() == buttonB ||
+                e.getSource() == buttonC || e.getSource() == buttonD)) {
+            displayAnswer();
+            if (answer ==answers[index]) {
+                correct_guesses +=2;
+            }
+        }
     }
 
     public void displayAnswer() {
@@ -1152,6 +1203,7 @@ public class Quiz implements ActionListener {
         buttonB.setEnabled(false);
         buttonC.setEnabled(false);
         buttonD.setEnabled(false);
+        buttonL.setEnabled(false);
 
         result = (int)(correct_guesses/(double)total_questions *100);
 
@@ -1174,13 +1226,13 @@ public class Quiz implements ActionListener {
 
         if (result >= 70) {
             JLabel passMessage = new JLabel("Bad day to be a wrong question, stay locked in");
-            passMessage.setBounds(100, 475, 500, 25);
+            passMessage.setBounds(225, 475, 500, 25);
             passMessage.setForeground(new Color(39, 148, 39)); // Green color for pass message
             passMessage.setFont(new Font("Bookman Old Style", Font.BOLD, 12));
             frame.add(passMessage);
         } else {
-            JLabel failMessage = new JLabel("... you needa lock in fr");
-            failMessage.setBounds(100, 475, 500, 25);
+            JLabel failMessage = new JLabel("you needa lock in fr");
+            failMessage.setBounds(225, 475, 500, 25);
             failMessage.setForeground(new Color(206, 54, 54)); // Red color for fail message
             failMessage.setFont(new Font("Bookman Old Style", Font.BOLD, 12));
             frame.add(failMessage);
